@@ -34,7 +34,7 @@ caps = DesiredCapabilities().CHROME
 caps["pageLoadStrategy"] = "none"  # Do not wait for full page load
 driver = webdriver.Chrome(desired_capabilities=caps, options=opt)  # 创建浏览器对象
 
-def download_for_char( link_ori, currentPage ):
+def download_char( link_ori, currentPage ):
     link = link_ori
     newLinkSection = {'cs', '.htm'}
     if currentPage > 1:
@@ -100,7 +100,7 @@ def download_for_char( link_ori, currentPage ):
     if currentPage == 1:
         return True
     else:
-        # download_for_char( link_ori, currentPage )
+        # download_char( link_ori, currentPage )
         return True
 
 def getCaoshu(zhi):
@@ -141,7 +141,7 @@ def getCaoshu(zhi):
 
     time.sleep(1)
     url=driver.current_url.encode('ascii', 'ignore')
-    download_for_char(url,1)
+    download_char(url,1)
 
 if __name__ == "__main__":
     # str = u''
