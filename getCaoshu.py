@@ -1,4 +1,7 @@
 # coding=utf-8
+from __future__ import print_function
+
+import chardet
 from selenium import webdriver
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from selenium.webdriver.common.keys import Keys
@@ -11,7 +14,8 @@ import datetime
 import re
 from pyvirtualdisplay import Display
 import socket
-# 設置超時30s
+
+# 設置超時
 socket.setdefaulttimeout(10)
 
 isDebug = True
@@ -24,8 +28,8 @@ HEADERS = {'User-Agent': USER_AGENT}
 
 STYLE_PER_PAGE = 24
 
-FOLDER_NAME=os.getcwd() + "//"
-filaNameCSV = FOLDER_NAME + '!og.log' #+ fileNamePre + datetime.datetime.now().strftime("%Y%m%d_%H%M") + '.csv'
+FOLDER_NAME = os.getcwd() + "//"
+filaNameCSV = FOLDER_NAME + '!og.log'  # + fileNamePre + datetime.datetime.now().strftime("%Y%m%d_%H%M") + '.csv'
 
 opt = webdriver.ChromeOptions()  # 创建浏览器
 # opt.set_headless()                            #无窗口模式
@@ -34,15 +38,17 @@ caps = DesiredCapabilities().CHROME
 caps["pageLoadStrategy"] = "none"  # Do not wait for full page load
 driver = webdriver.Chrome(desired_capabilities=caps, options=opt)  # 创建浏览器对象
 
-def download_char( link_ori, currentPage ):
+
+def download_char(link_ori, currentPage):
     link = link_ori
-    newLinkSection = {'cs', '.htm'}
+    linkori=link_ori
+    newLinkSections = {'cs', '.htm'}
     if currentPage > 1:
         if 'cs.htm' in link:
-            link = link.replace('cs.htm', str(currentPage-1).join(newLinkSection))
-        elif str(currentPage-2).join(newLinkSection) in link:
-            link = link.replace(str(currentPage - 2).join(newLinkSection),
-                                    str(currentPage - 1).join(newLinkSection)
+            link = link.replace('cs.htm', ("%s" % (currentPage-1)).join(newLinkSections))
+        elif ("%s" % (currentPage-2)).join(newLinkSections) in link:
+            link = link.replace(("%s" % (currentPage-2)).join(newLinkSections),
+                                ("%s" % (currentPage-1)).join(newLinkSections)
                                 )
     print(link)
     rt = requests.get(link, headers=HEADERS)
@@ -51,14 +57,14 @@ def download_char( link_ori, currentPage ):
     h2S = soupt.find_all('h2')
     for h2 in h2S:
         if h2.text.find(u'草书书法') > 0:
-            style_count= int(h2.text[h2.text.find(u'（')+1:h2.text.find(u'种')])
-            page_count= style_count / STYLE_PER_PAGE
-            if (page_count>0) and ((style_count % STYLE_PER_PAGE) >0):
-                page_count+=1
+            style_count = int(h2.text[h2.text.find(u'（') + 1:h2.text.find(u'种')])
+            page_count = style_count / STYLE_PER_PAGE
+            if (page_count > 0) and ((style_count % STYLE_PER_PAGE) > 0):
+                page_count += 1
             # print (page_count)
             if currentPage < page_count:
                 currentPage = currentPage + 1
-            elif currentPage>=page_count:
+            elif currentPage >= page_count:
                 currentPage = 1
     # http://www.cidianwang.com/shufa/piao4677_cs.htm
     # <li>
@@ -78,30 +84,30 @@ def download_char( link_ori, currentPage ):
                 img_char = img.get('title')[-1]
                 img_people = img.get('title')[:img.get('title').index(u'写的')]
                 img_link = img.get('src')
-                img_fp = img_link[-10:-4]       #img_link.index('caoshu/')+len('caoshu/'):-4]
+                img_fp = img_link[-10:-4]  # img_link.index('caoshu/')+len('caoshu/'):-4]
                 img_ext = img_link[-4:]
                 img_name = img_char + '_' + img_people + '_' + img_fp + img_ext
                 save_name = FOLDER_NAME + img_name
-                if ('gif' in save_name) :
-                    save_name=save_name.replace('gif','jpg')
+                if 'gif' in save_name:
+                    save_name = save_name.replace('.gif', '.gif.jpg')
                 if os.path.exists(save_name):
                     print(img_name, 'existed.')
                 else:
                     if 'http' in img_link:
                         try:
                             request.urlretrieve(img_link, save_name)  # '{}{}.jpg'.format(paths, x))
-                            print img_name
+                            print (img_name)
                             time.sleep(0.5)
                         except socket.timeout:
                             pass
-
 
                     # return True
     if currentPage == 1:
         return True
     else:
-        # download_char( link_ori, currentPage )
+        download_char(linkori, currentPage)
         return True
+
 
 def getCaoshu(zhi):
     # Open a new window
@@ -116,16 +122,16 @@ def getCaoshu(zhi):
 
     radios = driver.find_elements_by_xpath("//input[@type='radio']")
     for i in radios:
-        id= i.get_attribute("id")
-        if id=='s2':
+        id = i.get_attribute("id")
+        if id == 's2':
             i.click()
             # print id
 
-    texts=driver.find_elements_by_xpath("//input[@type='text']")
+    texts = driver.find_elements_by_xpath("//input[@type='text']")
     for i in texts:
-        id= i.get_attribute("id")
-        classtmp= i.get_attribute("class")
-        if id=='q' and classtmp=='k3 k6':
+        id = i.get_attribute("id")
+        classtmp = i.get_attribute("class")
+        if id == 'q' and classtmp == 'k3 k6':
             i.clear()
             # i.send_keys(unicode(zhi, 'utf-8'))
             i.send_keys(zhi)
@@ -140,35 +146,28 @@ def getCaoshu(zhi):
             # print id
 
     time.sleep(1)
-    url=driver.current_url.encode('ascii', 'ignore')
-    download_char(url,1)
+    url = driver.current_url.encode('utf-8')
+    download_char(url, 1)
+
 
 if __name__ == "__main__":
-    # str = u''
-    str = {
-        u'美女妖且闲，采桑歧路间。'
-        , u'柔条纷冉冉，落叶何翩翩。'
-        , u'攘袖见素手，皓腕约金环。'
-        , u'项上金爵钗，腰佩翠琅玕。'
-        , u'明珠交玉体，珊瑚间木难。'
-        , u'罗衣何飘摇，轻裾随风还。'
-        , u'顾盼遗光彩，长啸气若兰。 '
-        , u'行使用息驾，休者以忘餐。'
-        , u'借问女安在，乃在城南端。'
-        , u'青楼临大路，高门结重关。'
-        , u'容华耀朝日，谁不希令颜？'
-        , u'媒氏何所营？玉帛不时安。'
-        , u'佳人慕高义，求贤良独难。'
-        , u'众人徒嗷嗷，安知被所观？'
-        , u'盛年处房室，中夜起长叹。'
-    }
-    for z in u''.join(str):
-        if not(0xFF01 <= ord(z) <= 0xFF5E):
+    f = open('str','r')
+    str=f.read().decode('utf8')
+    print (str)
+
+    # print chardet.detect(str)
+    # print type(str)
+    for z in str:
+        ordz=ord(z)
+        # if not (0xFF01 <= ordz <= 0xFF5E):
+        if not (65281 <= ordz <= 65374)\
+                and ordz<>12290\
+                and ordz<>10:
+            print(z, type(z),ord(z))
             getCaoshu(z)
+            pass
     # driver.quit()
     # display.stop()
-
-
 
 #
 # ChromeOptions options = new ChromeOptions();
