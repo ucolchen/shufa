@@ -20,15 +20,12 @@ socket.setdefaulttimeout(10)
 
 isDebug = True
 
-display = Display(visible=0, size=(800, 600))
-display.start()
-
 USER_AGENT = 'Mozilla/4.0 (compatible; MSIE 5.5; Windows NT)'
 HEADERS = {'User-Agent': USER_AGENT}
 
 STYLE_PER_PAGE = 24
 
-FOLDER_NAME = os.getcwd() + "//"
+FOLDER_NAME = os.getcwd() + "//caoshu//"
 filaNameCSV = FOLDER_NAME + '!og.log'  # + fileNamePre + datetime.datetime.now().strftime("%Y%m%d_%H%M") + '.csv'
 
 opt = webdriver.ChromeOptions()  # 创建浏览器
@@ -36,7 +33,6 @@ opt = webdriver.ChromeOptions()  # 创建浏览器
 caps = DesiredCapabilities().CHROME
 # caps["pageLoadStrategy"] = "normal"  #  Waits for full page load
 caps["pageLoadStrategy"] = "none"  # Do not wait for full page load
-driver = webdriver.Chrome(desired_capabilities=caps, options=opt)  # 创建浏览器对象
 
 
 def download_char(link_ori, currentPage):
@@ -151,18 +147,37 @@ def getCaoshu(zhi):
 
 
 if __name__ == "__main__":
-    f = open('str','r')
+    from Tkinter import Tk
+    from tkinter.filedialog import askopenfilename
+    print('ask to open file...')
+    Tk().withdraw()  # we don't want a full GUI, so keep the root window from appearing
+    filename = askopenfilename()  # show an "Open" dialog box and return the path to the selected file
+    print(filename)
+
+    FOLDER_NAME = filename+'_//'
+    if not os.path.exists(FOLDER_NAME):
+        os.makedirs(FOLDER_NAME)
+        print ('made folder: ', FOLDER_NAME)
+
+    f = open(filename,'r')
     str=f.read().decode('utf8')
     print (str)
+
+    display = Display(visible=0, size=(800, 600))
+    display.start()
+
+    driver = webdriver.Chrome(desired_capabilities=caps, options=opt)  # 创建浏览器对象
 
     # print chardet.detect(str)
     # print type(str)
     for z in str:
         ordz=ord(z)
         # if not (0xFF01 <= ordz <= 0xFF5E):
+        # not Punctuation， not 。period not rtn, not space
         if not (65281 <= ordz <= 65374)\
-                and ordz<>12290\
-                and ordz<>10:
+                and ordz <> 12290\
+                and ordz <> 10\
+                and ordz <> 32:
             print(z, type(z),ord(z))
             getCaoshu(z)
             pass
