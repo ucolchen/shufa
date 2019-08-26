@@ -55,9 +55,9 @@ def download_char(link_ori, currentPage):
         if h2.text.find(u'草书书法') > 0:
             style_count = int(h2.text[h2.text.find(u'（') + 1:h2.text.find(u'种')])
             page_count = style_count / STYLE_PER_PAGE
-            if (page_count > 0) and ((style_count % STYLE_PER_PAGE) > 0):
+            if (page_count >= 0) and ((style_count % STYLE_PER_PAGE) > 0):
                 page_count += 1
-            # print (page_count)
+            print (style_count,' styles, page ', currentPage, ' of ', page_count)
             if currentPage < page_count:
                 currentPage = currentPage + 1
             elif currentPage >= page_count:
